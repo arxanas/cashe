@@ -71,7 +71,7 @@ The settings are as follows:
 the program to run. You can pass arguments to that command.
     * `time-to-live`: Optional. The amount of time before the output should be
       regenerated, in seconds. Defaults to `1`, which is probably not what you
-want.
+want. Must be less than 60.
     * `output-file`: Optional. The file to write the output to. If it's a
       relative path, it is treated with the working directory as `~/.cashe`;
 that is, something like `my-output.output` will write to
