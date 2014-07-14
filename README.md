@@ -48,10 +48,10 @@ output, and `read`, which reads that output.
 Run `cashe update` to regenerate all out-of-date targets, or `cashe update
 <target>` to regenerate the output of target `target` if it is out of date.
 
-Run `cashe read <target>` to read the output for the target `target`. If that
-target hasn't been generated, `cashe` will not print anything and will return
-`1`; otherwise it will print the output for that target and return `0`.
-Reading will never cause the output to be generated.
+Run `cashe read <target>` to read the output for the target `target` to stdout.
+If that target hasn't been generated, `cashe` will not print anything to stdout
+and will return `1`; otherwise it will print the output for that target and
+return `0`.  Reading will never cause the output to be generated.
 
 Configuration
 -------------
@@ -64,7 +64,7 @@ and the remainder the arguments to that setting. For example:
     time-to-live 10
     output-file hello-world.output
 
-The keys are as follows:
+The settings are as follows:
 
     * `command`: Required. The command to run. Since `cron` runs without a
       `$PATH` (at least on my system), you should specify an absolute path to
@@ -77,6 +77,8 @@ want.
 that is, something like `my-output.output` will write to
 `~/.cashe/my-output.output`. Defaults to the name of the target with the the
 extension `.output`.
+
+If a setting is specified more than once, the last definition is used.
 
 License
 -------
