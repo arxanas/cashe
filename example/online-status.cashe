@@ -1,0 +1,2 @@
+command /home/your-username/.cashe/online-status.sh
+time-to-live 5
