@@ -3,11 +3,15 @@ set -e
 shopt -s nullglob
 
 readonly CONFIG_DIR="$HOME/.cashe"
-if which gstat >/dev/null; then
-    GSTAT="$(which gstat)"
-else
-    GSTAT="$(which stat)"
-fi
+
+get_file_mtime()
+{
+    if which gstat >/dev/null; then
+        gstat -c%Y "$1"
+    else
+        stat -f'%m' "$1"
+    fi
+}
 
 readonly ERR_NO_OUTPUT_YET=1
 readonly ERR_UNKNOWN_MODE=2
@@ -99,11 +103,6 @@ mode_update()
 {
     local target_name="$1"
 
-    get_file_mtime()
-    {
-        "$GSTAT" -c%Y "$1"
-    }
-
     # Updates the given target, if necessary.
     #
     # target: The name of the target to update.
@@ -120,8 +119,10 @@ mode_update()
             # `command` is a builtin, apparently.
             local command_="$(get_setting $target_name command)"
 
-            $command_ >"$output_file_name"
-            log_message "Got return status $?"
+            # If the script terminates before the job completes, the job doesn't
+            # ever finish. This isn't really a concern since the caching is not
+            # meant to be very precise.
+            $command_ >"$output_file_name" &
         }
 
         if [[ ! -f "$output_file_name" ]]; then
@@ -131,7 +132,8 @@ mode_update()
         fi
 
         local last_updated="$(($(date +%s)-$(get_file_mtime $output_file_name)))"
-        if [[ "$last_updated" > "$time_to_live" ]]; then
+        log_message "Last update $target_name $last_updated seconds in the past, with $time_to_live seconds per refresh."
+        if [[ "$last_updated" -gt "$time_to_live" ]]; then
             log_message "Updating output for target $target_name"
             do_update
         fi
@@ -141,14 +143,11 @@ mode_update()
 
     # Run every second for the next minute.
     for i in {1..60}; do
-        # If the script terminates before the job completes, the job doesn't
-        # ever finish. This isn't really a concern since the caching is not
-        # meant to be very precise.
         if [[ -n "$target_name" ]]; then
-            update_single_target "$target_name" &
+            update_single_target "$target_name"
         else
             for i in ./*.cashe; do
-                update_single_target "$(basename ${i%.cashe})" &
+                update_single_target "$(basename ${i%.cashe})"
             done
         fi
         sleep 1
