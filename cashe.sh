@@ -122,7 +122,7 @@ mode_update()
             # If the script terminates before the job completes, the job doesn't
             # ever finish. This isn't really a concern since the caching is not
             # meant to be very precise.
-            $command_ >"$output_file_name" &
+            bash -c "$command_ >\"$output_file_name\"" &
         }
 
         if [[ ! -f "$output_file_name" ]]; then
