@@ -1,21 +1,21 @@
 #!/bin/bash
-set -ueo pipefail
+set -eo pipefail
 shopt -s nullglob
 
 readonly CONFIG_DIR="$HOME/.cashe"
 
 get_file_mtime()
 {
-    local stat
+    local stat_command
 
     if command -v gstat >/dev/null; then
-        stat="gstat"
+        stat_command="gstat"
     else
-        stat="stat"
+        stat_command="stat"
     fi
 
     # Assume that GNU stat has a version option and BSD stat doesn't.
-    if "$stat" --version; then
+    if "$stat_command" --version >/dev/null; then
         gstat -c%Y "$1"
     else
         stat -f'%m' "$1"
